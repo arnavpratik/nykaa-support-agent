@@ -18,9 +18,7 @@ from typing import Any, Dict, List, Optional
 from agent import run_agent
 from rag_core import get_embedding_model, retrieve
 
-# ==========================================
 # 1. LLM-as-Judge Prompt Templates
-# ==========================================
 
 PROMPT_CONTEXT_RELEVANCE = """\
 [JUDGE PROMPT: CONTEXT RELEVANCE]
@@ -84,9 +82,7 @@ MOCK_JUDGE_RULES_SUMMARY = """\
 """
 
 
-# ==========================================
 # 2. Benchmark Queries (12 In-Scope + 3 Edge Cases)
-# ==========================================
 
 QUERIES: List[Dict[str, Any]] = [
     # 12 In-Scope Queries (Exact file stems verified against kb/)
@@ -110,9 +106,7 @@ QUERIES: List[Dict[str, Any]] = [
 ]
 
 
-# ==========================================
 # 3. Deterministic Judge Scoring Functions
-# ==========================================
 
 def _is_refusal_response(agent_response: Dict[str, Any]) -> bool:
     answer_text = agent_response.get("answer", "")
@@ -184,35 +178,27 @@ def score_answer_relevance(
     return round(max(0.0, cos_sim), 4)
 
 
-# ==========================================
 # 4. Evaluation Runner
-# ==========================================
 
 def run_evaluation():
     embedder = get_embedding_model()
 
-    print("=" * 92)
     print("TASK 13: RAG TRIAD EVALUATION (15 QUERIES, 3 JUDGE SCORES)")
-    print("=" * 92)
     print("\n[RAG Scope Note]: The RAG triad is defined strictly for knowledge retrieval pathways.")
     print("Order-status tracking queries route to the deterministic order tool and are evaluated separately.\n")
 
-    print("-" * 92)
     print("LLM-AS-JUDGE PROMPT TEMPLATES & MOCK SCORING RULES")
-    print("-" * 92)
     print(PROMPT_CONTEXT_RELEVANCE)
     print(PROMPT_GROUNDEDNESS)
     print(PROMPT_ANSWER_RELEVANCE)
     print(MOCK_JUDGE_RULES_SUMMARY)
-    print("-" * 92)
 
     results = []
     in_scope_scores = {"c_rel": [], "ground": [], "a_rel": []}
     all_scores = {"c_rel": [], "ground": [], "a_rel": []}
 
-    print("\n" + "=" * 92)
+    print()
     print(f"{'ID':<3} | {'Topic':<22} | {'Route':<7} | {'C.Rel':<6} | {'Gnd':<5} | {'A.Rel':<6} | {'Top Source / Behavior'}")
-    print("-" * 92)
 
     for item in QUERIES:
         q_id = item["id"]
@@ -283,13 +269,10 @@ def run_evaluation():
     mean_all_g = round(sum_all_g / 15.0, 4)
     mean_all_a = round(sum_all_a / 15.0, 4)
 
-    print("-" * 92)
     print(f"SUM (12 In-Scope Only):         | {'-':<7} | {sum_in_c:<6.4f} | {sum_in_g:<5.2f} | {sum_in_a:<6.4f} |")
     print(f"AVERAGE (12 In-Scope Only):     | {'-':<7} | {mean_in_c:<6.4f} | {mean_in_g:<5.4f}| {mean_in_a:<6.4f} | (#5 retrieved return_window vs warranty)")
-    print("-" * 92)
     print(f"SUM (All 15 Evaluated):         | {'-':<7} | {sum_all_c:<6.4f} | {sum_all_g:<5.2f} | {sum_all_a:<6.4f} |")
     print(f"AVERAGE (All 15 Evaluated):     | {'-':<7} | {mean_all_c:<6.4f} | {mean_all_g:<5.4f}| {mean_all_a:<6.4f} | (Out-of-scope refusal #13,#14 = 1.0)")
-    print("=" * 92)
 
     # Topic Coverage Check across 12 in-scope expected_docs
     in_scope_expected = [q["expected_doc"] for q in QUERIES if q["expected_doc"] is not None]

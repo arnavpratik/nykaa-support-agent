@@ -25,11 +25,9 @@ OUT_OF_SCOPE_QUERIES = [
 
 
 def run_calibration(collection_name: str):
-    print(f"\n" + "=" * 70)
+    print()
     print(f"CALIBRATION TABLE: Collection '{collection_name}'")
-    print("=" * 70)
     print(f"{'Type':<12} | {'Top-1 Sim':<10} | {'Top Doc':<20} | Query")
-    print("-" * 70)
 
     in_scope_sims = []
     for q, expected_doc in IN_SCOPE_QUERIES:
@@ -40,7 +38,6 @@ def run_calibration(collection_name: str):
         in_scope_sims.append(sim)
         print(f"{'IN-SCOPE':<12} | {sim:<10.4f} | {doc:<20} | \"{q}\"")
 
-    print("-" * 70)
     out_scope_sims = []
     for q in OUT_OF_SCOPE_QUERIES:
         res = retrieve(q, collection_name=collection_name, k=1)
@@ -55,7 +52,6 @@ def run_calibration(collection_name: str):
     min_out = min(out_scope_sims)
     max_out = max(out_scope_sims)
 
-    print("=" * 70)
     print(f"CLUSTER ANALYSIS ({collection_name}):")
     print(f"  - In-Scope Cluster:     [{min_in:.4f}, {max_in:.4f}] (Min: {min_in:.4f})")
     print(f"  - Out-of-Scope Cluster: [{min_out:.4f}, {max_out:.4f}] (Max: {max_out:.4f})")
@@ -79,19 +75,15 @@ def run_calibration(collection_name: str):
 
 
 def main():
-    print("=" * 70)
     print("TASK 4: THRESHOLD CALIBRATION EXPERIMENT")
-    print("=" * 70)
 
     stats_fixed = run_calibration("kb_fixed")
     stats_sentence = run_calibration("kb_sentence")
 
-    print("\n" + "=" * 70)
+    print()
     print("FINAL CALIBRATION SUMMARY & DECISION")
-    print("=" * 70)
     print(f"kb_fixed:    Min In-Scope = {stats_fixed['min_in']:.4f} | Max Out-of-Scope = {stats_fixed['max_out']:.4f} | Threshold = {stats_fixed['threshold']:.4f}")
     print(f"kb_sentence: Min In-Scope = {stats_sentence['min_in']:.4f} | Max Out-of-Scope = {stats_sentence['max_out']:.4f} | Threshold = {stats_sentence['threshold']:.4f}")
-    print("=" * 70)
 
 
 if __name__ == "__main__":

@@ -22,9 +22,7 @@ import rag_core
 from schema import validate_response
 
 
-# ==========================================
 # Pydantic Schemas
-# ==========================================
 
 class AskRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=1000, description="Customer inquiry")
@@ -52,9 +50,7 @@ class AddDocumentResponse(BaseModel):
     collection: str
 
 
-# ==========================================
 # FastAPI Lifespan & App Setup
-# ==========================================
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -86,9 +82,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(status_code=422, content={"detail": exc.errors()})
 
 
-# ==========================================
 # Endpoints
-# ==========================================
 
 @app.get("/health")
 def health() -> Dict[str, str]:

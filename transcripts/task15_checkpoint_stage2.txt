@@ -1,0 +1,34 @@
+﻿================================================================================
+TASK 15 - STAGE 2: PROCESS RESUMPTION FROM DISK
+Connecting to: checkpoints.sqlite with Thread ID: ckpt-demo-01
+
+--- Reading Checkpoint from Disk Before Resuming ---
+Loaded 'next' from DB:       ('rag_tool',)
+Loaded 'route' from DB:      rag
+Loaded 'query' from DB:      How long do I have to return an unopened face cream?
+
+--- Resuming Graph Invocation (Stage 2) with invoke(None, config) ---
+[EXEC] rag_tool
+[EXEC] output_guard
+[EXEC] finalize
+
+--- Final State Validation ---
+Final Route:                 rag
+Grounded:                    True
+Sources:                     ['return_window', 'size_exchange']
+Answer:                      According to Nykaa policy: Beauty, makeup, cosmetics, skincare, and personal care items carry a strict 5-day return window and must remain unopened with their original seal intact.
+
+--- Direct SQLite Checkpoint Audit ---
+Total Checkpoint Snapshots for thread 'ckpt-demo-01': 8
+  Row 1: thread_id=ckpt-demo-01 | checkpoint_id=1f1d8290-3e30-6174-bfff-3efda482d156 | parent_id=None
+  Row 2: thread_id=ckpt-demo-01 | checkpoint_id=1f1d8290-3e34-6f8f-8000-b30904bb95ac | parent_id=1f1d8290-3e30-6174-bfff-3efda482d156
+  Row 3: thread_id=ckpt-demo-01 | checkpoint_id=1f1d8290-3e54-6d9c-8001-4c579fb64019 | parent_id=1f1d8290-3e34-6f8f-8000-b30904bb95ac
+  Row 4: thread_id=ckpt-demo-01 | checkpoint_id=1f1d8290-3e54-6d9d-8002-a6db78c966fd | parent_id=1f1d8290-3e54-6d9c-8001-4c579fb64019
+  Row 5: thread_id=ckpt-demo-01 | checkpoint_id=1f1d8290-3e5a-6aab-8003-942952563607 | parent_id=1f1d8290-3e54-6d9d-8002-a6db78c966fd
+  Row 6: thread_id=ckpt-demo-01 | checkpoint_id=1f1d8290-8c0a-6ab4-8004-ba9d413f5d35 | parent_id=1f1d8290-3e5a-6aab-8003-942952563607
+  Row 7: thread_id=ckpt-demo-01 | checkpoint_id=1f1d8290-8c0f-6903-8005-11ea2b623e50 | parent_id=1f1d8290-8c0a-6ab4-8004-ba9d413f5d35
+  Row 8: thread_id=ckpt-demo-01 | checkpoint_id=1f1d8290-8c1f-672d-8006-c4747f44ffdc | parent_id=1f1d8290-8c0f-6903-8005-11ea2b623e50
+
+Memory Store Audit: conversation 'conv-ckpt-demo-01' has 1 saved turn(s) (expected: 1).
+
+Stage 2 completed successfully: remaining nodes executed without early node replay.

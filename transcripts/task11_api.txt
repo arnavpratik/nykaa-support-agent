@@ -1,6 +1,5 @@
 ﻿===========================================================================
 TASK 11: FASTAPI ENDPOINT DEMONSTRATION
-===========================================================================
 
 [Call 1]: GET /health
   Status: 200
@@ -77,8 +76,6 @@ TASK 11: FASTAPI ENDPOINT DEMONSTRATION
   Status: 409
   Body:   {'detail': "Document 'test_gift_wrap' already exists in KB collections."}
 
-===========================================================================
 CLEANUP: Restoring ChromaDB to frozen baseline counts (40 fixed, 48 sentence)
-===========================================================================
 Chroma collections restored -> kb_sentence: 48 chunks | kb_fixed: 40 chunks
 Baseline chunk integrity verified: PASS

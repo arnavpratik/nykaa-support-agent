@@ -1,6 +1,5 @@
 ﻿=================================================================
 KNOWLEDGE BASE INDEXING (TASK 3)
-=================================================================
 Loaded 12 documents from kb/:
   - cod_refund.txt (456 characters)
   - damaged_item.txt (518 characters)
@@ -19,9 +18,7 @@ Loading SentenceTransformer('all-MiniLM-L6-v2')...
 Indexing collection 'kb_fixed'...
 Indexing collection 'kb_sentence'...
 
-=================================================================
 COLLECTION INDEXING SUMMARY
-=================================================================
 Collection 'kb_fixed':
   - Total Chunks: 40
   - Chunk Size / Overlap: 200 / 40
@@ -31,4 +28,3 @@ Collection 'kb_sentence':
   - Total Chunks: 48
   - Strategy: Standalone sentence split
   - Average Chunk Length: 123.4 characters
-=================================================================

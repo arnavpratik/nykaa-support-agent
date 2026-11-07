@@ -18,9 +18,8 @@ GROUND_TRUTH: Dict[str, Set[str]] = {
 
 
 def evaluate_collection(collection_name: str) -> Dict[str, float]:
-    print("\n" + "=" * 75)
+    print()
     print(f"EVALUATION: Collection '{collection_name}' (k=3)")
-    print("=" * 75)
 
     precisions = []
     recalls = []
@@ -63,39 +62,31 @@ def evaluate_collection(collection_name: str) -> Dict[str, float]:
     mean_r = sum(recalls) / len(recalls)
     mean_sim = sum(top_sims) / len(top_sims)
 
-    print("-" * 75)
     print(f"SUMMARY FOR '{collection_name}':")
     print(f"  Mean Precision@3:       {mean_p:.4f}")
     print(f"  Mean Recall@3:          {mean_r:.4f}")
     print(f"  Mean Top-1 Similarity:  {mean_sim:.4f}")
-    print("=" * 75)
 
     return {"mean_p": mean_p, "mean_r": mean_r, "mean_sim": mean_sim}
 
 
 def main():
-    print("=" * 75)
     print("TASK 5: CHUNKING STRATEGY EVALUATION (PRECISION@3 & RECALL@3)")
-    print("=" * 75)
 
     res_fixed = evaluate_collection("kb_fixed")
     res_sentence = evaluate_collection("kb_sentence")
 
-    print("\n" + "=" * 75)
+    print()
     print("COMPARATIVE EVALUATION SUMMARY")
-    print("=" * 75)
     print(f"{'Strategy':<18} | {'Mean P@3':<12} | {'Mean R@3':<12} | {'Mean Top-1 Sim':<14}")
-    print("-" * 75)
     print(f"{'kb_fixed':<18} | {res_fixed['mean_p']:<12.4f} | {res_fixed['mean_r']:<12.4f} | {res_fixed['mean_sim']:<14.4f}")
     print(f"{'kb_sentence':<18} | {res_sentence['mean_p']:<12.4f} | {res_sentence['mean_r']:<12.4f} | {res_sentence['mean_sim']:<14.4f}")
-    print("=" * 75)
 
     print("\nCHUNKING RECOMMENDATION:")
     print("Both strategies tied on document-level Mean Precision@3 (0.7000) and Mean Recall@3 (1.0000).")
     print("We break the tie using the secondary signal of Mean Top-1 Similarity (0.5158 for kb_sentence")
     print("vs. 0.4785 for kb_fixed) and select kb_sentence for deployment, as standalone policy sentences")
     print("avoid mid-clause cuts and yield stronger rank-1 confidence (e.g., COD refund 0.7956 vs. 0.6773).")
-    print("=" * 75)
 
 
 if __name__ == "__main__":

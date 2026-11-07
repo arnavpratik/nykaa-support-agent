@@ -1,5 +1,5 @@
 ﻿"""
-demo_api.py
+run_api.py
 Comprehensive demonstration of FastAPI endpoints using TestClient.
 Executes 7 test scenarios (health, rag, order, PII, validation error 422,
 document ingestion 200, and duplicate conflict 409), followed by strict
@@ -21,9 +21,7 @@ def run_demo():
     if os.path.exists(LOGS_FILE):
         os.remove(LOGS_FILE)
 
-    print("=" * 75)
     print("TASK 11: FASTAPI ENDPOINT DEMONSTRATION")
-    print("=" * 75)
 
     with TestClient(app) as client:
         # Call 1: Health check
@@ -74,9 +72,8 @@ def run_demo():
         print(f"  Body:   {r7.json()}")
 
     # Cleanup temporary ChromaDB test documents to preserve frozen benchmark index
-    print("\n" + "=" * 75)
+    print()
     print("CLEANUP: Restoring ChromaDB to frozen baseline counts (40 fixed, 48 sentence)")
-    print("=" * 75)
     chroma_client = rag_core.get_chroma_client()
     coll_s = chroma_client.get_collection("kb_sentence")
     coll_f = chroma_client.get_collection("kb_fixed")

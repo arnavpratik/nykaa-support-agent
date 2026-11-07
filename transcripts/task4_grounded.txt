@@ -1,7 +1,6 @@
 ﻿======================================================================
 TASK 4: GROUNDED GENERATION DEMO (MOCK_LLM)
 Collection: kb_sentence | Calibrated Threshold: 0.3
-======================================================================
 
 [Query 1]: "How long do I have to return a lipstick?"
   - Grounded:       True
@@ -44,5 +43,3 @@ Collection: kb_sentence | Calibrated Threshold: 0.3
   - Top Similarity: 0.4771
   - Sources:        []
   - Answer:         I don't know based on the Nykaa knowledge base.
-
-======================================================================

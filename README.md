@@ -1,7 +1,7 @@
 ﻿# Nykaa Domain Support Agent (LangGraph)
 
-Building the **Nykaa (E-commerce & Retail)** track (Current Progress: Days 1–5).
-Everything runs under `MOCK_LLM` with zero API keys.
+Completed the **Nykaa (E-commerce & Retail)** track.
+Everything runs under `MOCK_LLM` with zero API keys and zero network access (after the one-time embedding-model download).
 
 ## How to Reproduce
 Run the project scripts in sequence from the project root:
@@ -16,20 +16,33 @@ Run the project scripts in sequence from the project root:
 
     # Day 3: Calibration, Grounded Generation, Evaluation & Tool Execution
     python calibrate.py
-    python demo_grounded.py
+    python run_grounded.py
     python evaluate_chunking.py
-    python demo_tool.py
+    python run_tool.py
 
     # Day 4: State Machine, Memory, Schema & Guardrail Transcripts
-    python demo_agent.py t7
-    python demo_agent.py t8_multi
-    python demo_agent.py t8_fresh
-    python demo_agent.py t9
-    python demo_agent.py t10
+    python run_agent.py t7
+    python run_agent.py t8_multi
+    python run_agent.py t8_fresh
+    python run_agent.py t9
+    python run_agent.py t10
 
     # Day 5: FastAPI Service, Logging Audit & RAG Triad Evaluation
-    python demo_api.py
+    python run_api.py
     python eval_triad.py
+
+    # Day 6: MCP, SQLite checkpointing, resilience
+    # MCP needs two terminals (server blocks; port 8000 must be free, so stop uvicorn first)
+    #   Terminal 1: python mcp_server.py
+    #   Terminal 2: python mcp_client.py
+    python run_checkpoint.py stage1
+    python run_checkpoint.py stage2
+    python run_resilience.py retry
+    python run_resilience.py node_timeout
+    python run_resilience.py global_timeout
+
+    # Interactive FastAPI Server (Swagger UI at http://127.0.0.1:8000/docs)
+    uvicorn api:app --reload
 
 Outputs match files in `transcripts/` deterministically.
 
@@ -87,9 +100,9 @@ Outputs match files in `transcripts/` deterministically.
   - For the deployed `kb_sentence` collection, purely unrelated queries cluster tightly in `[0.0779, 0.1236]` (`[0.0848, 0.1510]` on `kb_fixed`), while in-scope queries score in `[0.3453, 0.7956]`.
   - A near-miss corporate query (*"What is Nykaa's current share price on the stock exchange?"*) scored `0.4771` on `kb_sentence` because financial tokens overlap `loyalty_points`. Raising the similarity threshold to `0.49` would improperly reject valid indirect customer questions like *"My shoes don't fit"* (`0.3453`).
   - **Operational Decision**: Retrieval confidence threshold for `kb_sentence` is calibrated at **`0.30`** (between max unrelated `0.1236` and min in-scope `0.3453`), paired with a deterministic corporate/non-support keyword guardrail to catch corporate near-misses.
-- **Grounded Generation (`generate.py` & `demo_grounded.py`)**:
+- **Grounded Generation (`generate.py` & `run_grounded.py`)**:
   - Queries below `0.30` similarity or matching corporate keywords return: `"I don't know based on the Nykaa knowledge base."` with empty sources (`grounded=False`).
-  - Tested across 5 in-scope queries and 2 out-of-scope queries (unrelated cake query at `0.0779` and corporate share price query at `0.4771` both trigger fallback deterministically).
+  - Demonstrated on 5 in-scope queries plus 1 out-of-scope query ("How do I bake a chocolate cake?", similarity `0.0779`), which triggers the fallback deterministically. The corporate near-miss ("Nykaa share price", `0.4771`, above threshold) is caught by the out-of-scope keyword guardrail and demonstrated in Task 10.
 
 ---
 
@@ -107,7 +120,7 @@ Evaluated using 5 distinct in-scope queries against pre-established ground truth
 ---
 
 ## Order Status & Escalation Scoring Tool (Task 6)
-- **Tool Implementation (`tools.py` & `demo_tool.py`)**:
+- **Tool Implementation (`tools.py` & `run_tool.py`)**:
   - Provides `check_order_status(record_id: str) -> dict` with case/whitespace normalization (`"  ord-0008  "` resolves cleanly) and structured error dicts for unknown IDs.
 - **Escalation Formula & Resolved-Order Rule**:
   $$\text{recency} = \min\left(\frac{\text{days\_since\_created}}{30}, 1.0\right)$$
@@ -134,7 +147,7 @@ State contains: `query`, `conversation_id`, `trace_id`, `masked_query`, `history
   2. `node_input_guard`: Redacts PII, checks for prompt injection, and flags out-of-scope queries.
   3. `node_classify_intent`: Evaluates masked text for `ORD-\d{4}` regex or order keywords with remembered `last_order_id`; routes to `order_status` or defaults to `rag`.
   4. `node_order_tool`: Calls `check_order_status` and formats structured order response.
-  5. `node_rag_tool`: Executes grounded retrieval via `answer(collection_name="kb_sentence")`.
+  5. `node_rag_tool`: Executes grounded retrieval via `answer(collection_name="kb_sentence")`. When `[PHONE_MASKED]` or `[CARD_LAST4_MASKED]` is present in `masked_query`, filters out the PII filler clause before embedding so placeholder tokens do not dilute semantic similarity below `0.30`.
   6. `node_output_guard`: Validates groundedness under `MOCK_LLM` (checks provenance against retrieved text).
   7. `node_finalize`: Enforces JSON Schema validation, persists turn to disk, and emits final payload.
 
@@ -235,3 +248,69 @@ Evaluated across 15 distinct test queries: 12 in-scope policy queries (1 per KB 
    - **The triad works as a system**: Context Relevance (`0.2850`) and Answer Relevance (`0.2913`) cleanly expose the defect—the agent cited a 7-day return window instead of answering who handles manufacturer warranty repairs.
 2. **Extractive Mock Groundedness**: Under `MOCK_LLM`, groundedness is `1.00` by construction for answered queries. It does not validate real-world abstractive summarization, but confirms that ungrounded queries (#14) fall back without hallucination.
 3. **Ambiguity Over-Retrieval**: Query #15 (*"Can I return it?"*) retrieved `return_window` (`0.3668`) despite zero item context, demonstrating that under-specified queries can pass retrieval barriers when tokens overlap general policy titles.
+
+---
+
+## MCP, SQLite Checkpointing & Resilience (Tasks 14–16)
+
+### Task 14: MCP server and client
+- `mcp_server.py` (FastMCP) exposes one tool, `check_order_status`, at `http://127.0.0.1:8000/mcp`. It imports the same function from `tools.py`, so the agent and the MCP server share one implementation. The tool docstring covers the `ORD-0012` ID format, the returned fields (`status`, `order_value_inr`, `escalation_score`, `escalate`, `reason`) and the unknown-ID behavior.
+- `mcp_client.py` is a separate process. It lists the tools and calls `check_order_status` for three IDs:
+  - `ORD-0001`: Placed, delayed, score `0.6933`, escalate `True`
+  - `ORD-0008`: Returned, score `0.0`
+  - `ORD-9999`: structured error dict (order not found)
+- Run: Terminal 1 `python mcp_server.py`, Terminal 2 `python mcp_client.py`.
+
+### Task 15: SQLite checkpointing and resume
+- `SqliteSaver` with `checkpoints.sqlite`, thread ID `ckpt-demo-01`, compiled with `interrupt_before=["rag_tool"]`.
+- **Stage 1** (`python run_checkpoint.py stage1`): runs `load_memory`, `input_guard` and `classify_intent`, then stops before `rag_tool`. The process exits.
+- **Stage 2** (`python run_checkpoint.py stage2`, a new process): loads the saved state for the same thread, resumes, and runs only `rag_tool`, `output_guard` and `finalize`.
+- Each node prints an `[EXEC]` marker when it actually runs. The stage 2 transcript shows no markers for the first three nodes, which proves they were loaded from the checkpoint and not re-executed.
+- Eight checkpoint rows are printed directly from the SQLite file.
+- Scope: the API graph has no checkpointer. This graph is for the demo only.
+
+### Task 16: Timeouts and retries
+All nodes are async, so `asyncio.wait_for` genuinely cancels the slow call. A timeout on a sync node cannot stop a blocking thread.
+
+| Mechanism | Configuration | Result |
+|---|---|---|
+| Retry (LangGraph `RetryPolicy`) | `max_attempts=4`, `initial_interval=0.2s`, `backoff_factor=2.0`, `max_interval=2.0s`, `jitter=True`, `retry_on=TransientError` | Node fails twice, succeeds on attempt 3 (1.428s total; jitter adds up to 1s per retry). Exhaustion after 4 attempts raises cleanly. |
+| Per-node timeout | `@with_timeout(seconds=1.0)` raising `NodeTimeoutError`, not in `retry_on` | Fired at 1.005s on a 5s sleep |
+| Global timeout | `asyncio.wait_for(graph.ainvoke(...), timeout=2.0)` | Fired at 2.013s. Node 3 was cancelled and node 4 never started (four 0.8s nodes). |
+
+Intervals are short so the demo runs quickly. Production values would be larger.
+
+---
+
+## Transcript-Per-Task Verification Map (Tasks 1–16)
+All 23 verification artifacts in `transcripts/` are non-empty and deterministically reproducible:
+
+| Task | Description | Transcript File(s) |
+|---|---|---|
+| **Task 1** | Synthetic Order Dataset (`seed=42`, 60 orders, 20.00% delayed) | `transcripts/task1_dataset.txt` |
+| **Task 2** | 12-Document Nykaa Policy Knowledge Base | `kb/*.txt` (verified in `task3_index.txt`) |
+| **Task 3** | Dual Chunking (`kb_fixed`: 40, `kb_sentence`: 48) & Sample Retrieval | `transcripts/task3_index.txt`<br>`transcripts/task3_sample_retrieval.txt` |
+| **Task 4** | Threshold Calibration (`0.30`) & Grounded Generation | `transcripts/task4_calibration.txt`<br>`transcripts/task4_grounded.txt` |
+| **Task 5** | Quantitative Chunking Evaluation (`P@3=0.7000`, `R@3=1.0000`) | `transcripts/task5_eval.txt` |
+| **Task 6** | Order Status Tool & 80th-Percentile Escalation (`0.3733`) | `transcripts/task6_tool.txt` |
+| **Task 7** | LangGraph Conditional Routing (`rag` vs `order_status`) | `transcripts/task7_routing.txt` |
+| **Task 8** | Conversational Memory (Multi-Turn Follow-up vs Fresh Session) | `transcripts/task8_memory_multiturn.txt`<br>`transcripts/task8_memory_fresh.txt` |
+| **Task 9** | Output JSON Schema Validation (Valid + Invalid Rejection) | `transcripts/task9_schema.txt` |
+| **Task 10** | Input/Output Guardrails (PII Masking, Injection, OOS, Groundedness) | `transcripts/task10_guardrails.txt` |
+| **Task 11** | FastAPI Service (`GET /health`, `POST /ask`, `POST /add-document`) | `transcripts/task11_api.txt` |
+| **Task 12** | PII-Scrubbed Forensic JSONL Audit Logging | `transcripts/task12_log_sample.jsonl` |
+| **Task 13** | 15-Query RAG Triad Evaluation (`A.Rel=0.4848` in-scope / `0.5504` all-15) | `transcripts/task13_triad.txt`<br>`transcripts/task13_scores.json` |
+| **Task 14** | MCP Server & Client Discovery and Execution | `transcripts/task14_mcp_server.txt`<br>`transcripts/task14_mcp_client.txt` |
+| **Task 15** | Two-Stage Cross-Process SQLite Checkpointing (`SqliteSaver`) | `transcripts/task15_checkpoint_stage1.txt`<br>`transcripts/task15_checkpoint_stage2.txt` |
+| **Task 16** | Resilience Wrappers (Retry with Jitter, Node & Global Timeouts) | `transcripts/task16_retry.txt`<br>`transcripts/task16_node_timeout.txt`<br>`transcripts/task16_global_timeout.txt` |
+
+---
+
+## Known Limitations
+
+- **Heuristic guardrails and router:** the injection patterns, out-of-scope keywords and intent router catch known phrasings only. A follow-up such as "When will it arrive?" after an order lookup routes to RAG, because it has no tracking keyword.
+- **PII scope:** only phone numbers and context-anchored card last-4 digits are masked. Names and addresses are not.
+- **Mock groundedness:** `1.00` by construction, because the extractive mock copies retrieved text. Wrong-document retrieval (query #5) is visible only in context relevance and answer relevance.
+- **Escalation distribution:** zero-inflated (33 of 60 orders are resolved and score 0), so the 80th percentile is effectively a percentile of open orders.
+- **`sources` semantics:** lists documents retrieved above the threshold, not only the document quoted in the answer.
+- **Checkpointed graph:** demo-only. The API graph uses `memory_store.json`.

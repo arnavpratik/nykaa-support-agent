@@ -1,12 +1,12 @@
 ﻿"""
-demo_grounded.py
+run_grounded.py
 Demonstrates Task 4 grounded generation across 5 diverse in-scope customer queries
 and 2 out-of-scope queries (1 unrelated trivia + 1 near-miss brand query).
 """
 
 from generate import answer, SIMILARITY_THRESHOLD
 
-DEMO_QUERIES = [
+TEST_QUERIES = [
     # 5 In-scope queries (direct, indirect, and category testing)
     "How long do I have to return a lipstick?",
     "Can I return a mascara I opened?",
@@ -20,12 +20,10 @@ DEMO_QUERIES = [
 
 
 def main():
-    print("=" * 70)
     print("TASK 4: GROUNDED GENERATION DEMO (MOCK_LLM)")
     print(f"Collection: kb_sentence | Calibrated Threshold: {SIMILARITY_THRESHOLD}")
-    print("=" * 70)
 
-    for idx, q in enumerate(DEMO_QUERIES, 1):
+    for idx, q in enumerate(TEST_QUERIES, 1):
         result = answer(q, collection_name="kb_sentence")
         print(f"\n[Query {idx}]: \"{q}\"")
         print(f"  - Grounded:       {result['grounded']}")
@@ -33,7 +31,7 @@ def main():
         print(f"  - Sources:        {result['sources']}")
         print(f"  - Answer:         {result['answer']}")
 
-    print("\n" + "=" * 70)
+    print()
 
 
 if __name__ == "__main__":

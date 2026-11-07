@@ -53,10 +53,8 @@ def display_results(results, title: str):
 
 
 def main():
-    print("=" * 65)
     print("SAMPLE RETRIEVAL VERIFICATION")
     print(f"Query: \"{QUERY}\"")
-    print("=" * 65)
 
     model = SentenceTransformer(EMBEDDING_MODEL_NAME)
     client = chromadb.PersistentClient(path=CHROMA_PATH)
@@ -68,7 +66,6 @@ def main():
     col_sentence = client.get_collection("kb_sentence")
     res_sentence = query_collection(col_sentence, QUERY, model, top_k=3)
     display_results(res_sentence, "Collection: kb_sentence (Sentence-Based Chunks)")
-    print("=" * 65)
 
 
 if __name__ == "__main__":

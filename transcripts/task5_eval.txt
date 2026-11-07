@@ -1,10 +1,7 @@
 ﻿===========================================================================
 TASK 5: CHUNKING STRATEGY EVALUATION (PRECISION@3 & RECALL@3)
-===========================================================================
 
-===========================================================================
 EVALUATION: Collection 'kb_fixed' (k=3)
-===========================================================================
 
 [Q1]: "How long do I have to return a lipstick?"
   - Target Doc(s):        ['return_window']
@@ -50,16 +47,12 @@ EVALUATION: Collection 'kb_fixed' (k=3)
   - Precision@3:          1/2 = 0.5000
   - Recall@3:             1/1 = 1.0000
   - Top-1 Similarity:     0.4337
----------------------------------------------------------------------------
 SUMMARY FOR 'kb_fixed':
   Mean Precision@3:       0.7000
   Mean Recall@3:          1.0000
   Mean Top-1 Similarity:  0.4785
-===========================================================================
 
-===========================================================================
 EVALUATION: Collection 'kb_sentence' (k=3)
-===========================================================================
 
 [Q1]: "How long do I have to return a lipstick?"
   - Target Doc(s):        ['return_window']
@@ -105,25 +98,18 @@ EVALUATION: Collection 'kb_sentence' (k=3)
   - Precision@3:          1/2 = 0.5000
   - Recall@3:             1/1 = 1.0000
   - Top-1 Similarity:     0.4583
----------------------------------------------------------------------------
 SUMMARY FOR 'kb_sentence':
   Mean Precision@3:       0.7000
   Mean Recall@3:          1.0000
   Mean Top-1 Similarity:  0.5158
-===========================================================================
 
-===========================================================================
 COMPARATIVE EVALUATION SUMMARY
-===========================================================================
 Strategy           | Mean P@3     | Mean R@3     | Mean Top-1 Sim
----------------------------------------------------------------------------
 kb_fixed           | 0.7000       | 1.0000       | 0.4785        
 kb_sentence        | 0.7000       | 1.0000       | 0.5158        
-===========================================================================
 
 CHUNKING RECOMMENDATION:
 Both strategies tied on document-level Mean Precision@3 (0.7000) and Mean Recall@3 (1.0000).
 We break the tie using the secondary signal of Mean Top-1 Similarity (0.5158 for kb_sentence
 vs. 0.4785 for kb_fixed) and select kb_sentence for deployment, as standalone policy sentences
 avoid mid-clause cuts and yield stronger rank-1 confidence (e.g., COD refund 0.7956 vs. 0.6773).
-===========================================================================

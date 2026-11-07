@@ -1,11 +1,9 @@
 ﻿======================================================================
 TASK 6: ORDER STATUS & ESCALATION SCORING DEMO
-======================================================================
 Dataset Distribution (60 orders):
   P50: 0.0000 | P75: 0.3000 | P80: 0.3733 | P90: 0.6960
 Empirical Escalation Threshold: 0.3733 (80th percentile)
 Orders exceeding threshold: 13 of 60
-======================================================================
 
 [Test 1]: Query ID = "ORD-0008"
   - Order ID:  ORD-0008
@@ -46,5 +44,3 @@ Orders exceeding threshold: 13 of 60
 [Test 5]: Query ID = "ORD-9999"
   - Error:     Order not found
   - Message:   Order ID 'ORD-9999' does not exist in Nykaa records.
-
-======================================================================

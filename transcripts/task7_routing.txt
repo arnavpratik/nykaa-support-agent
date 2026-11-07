@@ -1,6 +1,5 @@
 ﻿======================================================================
 TASK 7: LANGGRAPH ROUTING DEMO (rag vs order_status)
-======================================================================
 
 [Test 1 - Policy]: "How long do I have to return a lipstick?"
   - Route Taken:           rag
@@ -13,5 +12,3 @@ TASK 7: LANGGRAPH ROUTING DEMO (rag vs order_status)
   - Grounded:              False
   - Tool Data (Status):    Returned
   - Answer:                Order ORD-0012 is currently 'Returned'. Order value: Rs 1760. Normal priority: Order is resolved (Returned). Escalation score is 0.0000.
-
-======================================================================

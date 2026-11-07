@@ -1,6 +1,4 @@
-﻿======================================================================
 TASK 8: FRESH CONVERSATION DEMO (No Memory Context)
-======================================================================
 
 [Fresh Conversation]: User: "is it delayed?"
   - Route:       rag
@@ -9,4 +7,3 @@ TASK 8: FRESH CONVERSATION DEMO (No Memory Context)
 
 [Disk Memory State]:
   - Remembered last_order_id: None
-======================================================================

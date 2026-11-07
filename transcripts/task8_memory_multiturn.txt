@@ -1,6 +1,4 @@
-﻿======================================================================
 TASK 8: MULTI-TURN MEMORY DEMO (Shared Conversation)
-======================================================================
 
 [Turn 1]: User: "status of ORD-0012"
   - Route:       order_status
@@ -14,4 +12,3 @@ TASK 8: MULTI-TURN MEMORY DEMO (Shared Conversation)
 [Disk Memory State]:
   - Remembered last_order_id: ORD-0012
   - Turns recorded:           2
-======================================================================

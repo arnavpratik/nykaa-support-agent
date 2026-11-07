@@ -59,10 +59,8 @@ if __name__ == "__main__":
     with open(sample_path, "r", encoding="utf-8") as f:
         sample_doc = f.read()
 
-    print("=" * 60)
     print("CHUNKING STRATEGY COMPARISON DEMO")
     print(f"Sample Document: {sample_path} ({len(sample_doc)} chars)")
-    print("=" * 60)
 
     fixed = fixed_size_chunks(sample_doc, chunk_size=200, overlap=40)
     print(f"\n--- Strategy 1: Fixed-Size (size=200, overlap=40) -> {len(fixed)} chunks ---")
@@ -73,4 +71,3 @@ if __name__ == "__main__":
     print(f"\n--- Strategy 2: Sentence-Based -> {len(sent)} chunks ---")
     for idx, c in enumerate(sent):
         print(f"[{idx}] ({len(c)} chars): {c}")
-    print("=" * 60)

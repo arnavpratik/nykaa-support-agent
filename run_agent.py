@@ -1,5 +1,5 @@
 ﻿"""
-demo_agent.py
+run_agent.py
 Generates all 5 Day 4 evaluation transcripts:
 - task7_routing.txt: Policy vs order status routing
 - task8_memory_multiturn.txt: Order ID resolution across conversational turns
@@ -18,9 +18,7 @@ from schema import AGENT_RESPONSE_SCHEMA, validate_response
 
 
 def run_task7():
-    print("=" * 70)
     print("TASK 7: LANGGRAPH ROUTING DEMO (rag vs order_status)")
-    print("=" * 70)
 
     # 1. Policy inquiry -> rag route
     q1 = "How long do I have to return a lipstick?"
@@ -40,13 +38,11 @@ def run_task7():
     print(f"  - Tool Data (Status):    {r2['data']['status'] if r2['data'] else None}")
     print(f"  - Answer:                {r2['answer']}")
 
-    print("\n" + "=" * 70)
+    print()
 
 
 def run_task8_multiturn():
-    print("=" * 70)
     print("TASK 8: MULTI-TURN MEMORY DEMO (Shared Conversation)")
-    print("=" * 70)
 
     conv_id = "conv-multiturn-01"
     memory.reset(conv_id)
@@ -71,13 +67,10 @@ def run_task8_multiturn():
     print("\n[Disk Memory State]:")
     print(f"  - Remembered last_order_id: {mem['last_order_id']}")
     print(f"  - Turns recorded:           {len(mem['messages'])}")
-    print("=" * 70)
 
 
 def run_task8_fresh():
-    print("=" * 70)
     print("TASK 8: FRESH CONVERSATION DEMO (No Memory Context)")
-    print("=" * 70)
 
     conv_id = "conv-fresh-01"
     memory.reset(conv_id)
@@ -93,13 +86,10 @@ def run_task8_fresh():
     mem = memory.load(conv_id)
     print("\n[Disk Memory State]:")
     print(f"  - Remembered last_order_id: {mem['last_order_id']}")
-    print("=" * 70)
 
 
 def run_task9_schema():
-    print("=" * 70)
     print("TASK 9: JSON SCHEMA VALIDATION VERIFICATION")
-    print("=" * 70)
 
     test_queries = [
         "How long do I have to return a lipstick?",
@@ -135,13 +125,11 @@ def run_task9_schema():
         print(f"  Malformed payload check: PASS (Successfully caught error)")
         print(f"  Caught ValidationError:  {e.message}")
 
-    print("\n" + "=" * 70)
+    print()
 
 
 def run_task10_guardrails():
-    print("=" * 70)
     print("TASK 10: GUARDRAILS VERIFICATION")
-    print("=" * 70)
 
     # 1. PII Redaction
     q1 = "My number is 9876543210 and card ending 4321, where is ORD-0012?"
@@ -175,7 +163,7 @@ def run_task10_guardrails():
     print(f"  - Route:                {r4['route']}")
     print(f"  - Answer:               {r4['answer']}")
 
-    print("\n" + "=" * 70)
+    print()
 
 
 def main():

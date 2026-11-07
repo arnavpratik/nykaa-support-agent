@@ -79,9 +79,7 @@ def populate_collection(
 
 
 def main():
-    print("=" * 65)
     print("KNOWLEDGE BASE INDEXING (TASK 3)")
-    print("=" * 65)
 
     docs = load_kb_documents()
     print(f"Loaded {len(docs)} documents from {KB_DIR}/:")
@@ -137,9 +135,8 @@ def main():
     avg_fixed = sum(fixed_lens) / len(fixed_lens) if fixed_lens else 0
     avg_sent = sum(sent_lens) / len(sent_lens) if sent_lens else 0
 
-    print("\n" + "=" * 65)
+    print()
     print("COLLECTION INDEXING SUMMARY")
-    print("=" * 65)
     print(f"Collection 'kb_fixed':")
     print(f"  - Total Chunks: {col_fixed.count()}")
     print(f"  - Chunk Size / Overlap: {CHUNK_SIZE} / {CHUNK_OVERLAP}")
@@ -149,7 +146,6 @@ def main():
     print(f"  - Total Chunks: {col_sentence.count()}")
     print(f"  - Strategy: Standalone sentence split")
     print(f"  - Average Chunk Length: {avg_sent:.1f} characters")
-    print("=" * 65)
 
 
 if __name__ == "__main__":

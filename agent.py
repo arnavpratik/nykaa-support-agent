@@ -1,4 +1,4 @@
-﻿"""
+"""
 agent.py
 LangGraph stateful orchestration engine for Nykaa Domain Support Agent.
 Implements 7 functional nodes, 2 conditional routing edges, strict schema enforcement,
@@ -36,10 +36,6 @@ class AgentState(TypedDict, total=False):
     result: Dict[str, Any]
     response: Dict[str, Any]
 
-
-# ==========================================
-# Graph Nodes
-# ==========================================
 
 def node_load_memory(state: AgentState) -> Dict[str, Any]:
     conv_id = state.get("conversation_id", "default")
@@ -161,13 +157,36 @@ def node_order_tool(state: AgentState) -> Dict[str, Any]:
 
 def node_rag_tool(state: AgentState) -> Dict[str, Any]:
     query_text = state.get("masked_query", "")
-    rag_res = answer(query_text, collection_name="kb_sentence")
+
+    if "[PHONE_MASKED]" in query_text or "[CARD_LAST4_MASKED]" in query_text:
+        clauses = [s.strip() for s in re.split(r"[.?!;]+", query_text) if s.strip()]
+        clean_clauses = [
+            s for s in clauses
+            if "[PHONE_MASKED]" not in s and "[CARD_LAST4_MASKED]" not in s
+        ]
+        if clean_clauses:
+            search_query = " ".join(clean_clauses) + "?"
+        else:
+            search_query = re.sub(
+                r"(my\s+)?(phone|number|mobile|card|ending\s+in|is|\s)*\[(PHONE_MASKED|CARD_LAST4_MASKED)\]",
+                " ",
+                query_text,
+                flags=re.IGNORECASE,
+            ).strip()
+    else:
+        search_query = query_text
+
+    if not search_query:
+        search_query = query_text
+
+    rag_res = answer(search_query, collection_name="kb_sentence")
     return {
         "result": {
             "answer": rag_res["answer"],
             "sources": rag_res["sources"],
             "grounded": rag_res["grounded"],
-            "top_similarity": rag_res.get("top_similarity", 0.0), "top_chunk_text": rag_res.get("top_chunk_text", ""),
+            "top_similarity": rag_res.get("top_similarity", 0.0),
+            "top_chunk_text": rag_res.get("top_chunk_text", ""),
             "data": None,
         }
     }
@@ -225,10 +244,6 @@ def node_finalize(state: AgentState) -> Dict[str, Any]:
     return {"response": response_payload}
 
 
-# ==========================================
-# Conditional Edge Deciders
-# ==========================================
-
 def route_after_input_guard(state: AgentState) -> str:
     if state.get("route") == "refused":
         return "finalize"
@@ -241,14 +256,9 @@ def route_after_classify(state: AgentState) -> str:
     return "rag_tool"
 
 
-# ==========================================
-# Graph Assembly
-# ==========================================
-
 def build_graph(checkpointer=None):
     workflow = StateGraph(AgentState)
 
-    # Register nodes
     workflow.add_node("load_memory", node_load_memory)
     workflow.add_node("input_guard", node_input_guard)
     workflow.add_node("classify_intent", node_classify_intent)
@@ -257,11 +267,9 @@ def build_graph(checkpointer=None):
     workflow.add_node("output_guard", node_output_guard)
     workflow.add_node("finalize", node_finalize)
 
-    # Wire edges
     workflow.add_edge(START, "load_memory")
     workflow.add_edge("load_memory", "input_guard")
 
-    # Edge 1: Input guard conditional split
     workflow.add_conditional_edges(
         "input_guard",
         route_after_input_guard,
@@ -271,7 +279,6 @@ def build_graph(checkpointer=None):
         },
     )
 
-    # Edge 2: Intent router conditional split
     workflow.add_conditional_edges(
         "classify_intent",
         route_after_classify,
@@ -289,7 +296,6 @@ def build_graph(checkpointer=None):
     return workflow.compile(checkpointer=checkpointer)
 
 
-# Singleton compiled graph instance
 AGENT = build_graph()
 
 
@@ -310,4 +316,3 @@ if __name__ == "__main__":
     print("  Route:   ", resp["route"])
     print("  Answer:  ", resp["answer"])
     print("  Sources: ", resp["sources"])
-

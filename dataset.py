@@ -7,9 +7,7 @@ Track: E-commerce & Retail (Nykaa)
 import random
 from typing import Any, Dict, List
 
-# ---------------------------------------------------------
 # CONSTANTS & DESIGN CHOICES
-# ---------------------------------------------------------
 SEED = 42
 N_RECORDS = 60
 
@@ -145,9 +143,7 @@ ORDERS = generate_orders()
 
 
 if __name__ == "__main__":
-    print("=" * 65)
     print("NYKAA DOMAIN DATASET VALIDATION (TASK 1)")
-    print("=" * 65)
     stats = validate_orders(ORDERS)
 
     print(f"Total Records: {stats['total']} [PASS >= 40]")
@@ -167,4 +163,3 @@ if __name__ == "__main__":
     print("Target Band: [10.0%, 30.0%] -> PASS")
     print("All Record IDs Unique: True [PASS]")
     print("Days Range [0, 30] Valid: True [PASS]")
-    print("=" * 65)

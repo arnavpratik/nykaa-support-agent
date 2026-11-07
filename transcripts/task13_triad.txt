@@ -1,13 +1,10 @@
-﻿============================================================================================
 TASK 13: RAG TRIAD EVALUATION (15 QUERIES, 3 JUDGE SCORES)
-============================================================================================
 
 [RAG Scope Note]: The RAG triad is defined strictly for knowledge retrieval pathways.
 Order-status tracking queries route to the deterministic order tool and are evaluated separately.
 
---------------------------------------------------------------------------------------------
 LLM-AS-JUDGE PROMPT TEMPLATES & MOCK SCORING RULES
---------------------------------------------------------------------------------------------
+
 [JUDGE PROMPT: CONTEXT RELEVANCE]
 You are an expert evaluator assessing retrieval quality.
 Given the user query and the retrieved context passages, determine how relevant the retrieved context is to addressing the query.
@@ -61,11 +58,8 @@ Reasoning: <concise explanation>
    - Correct refusal (out-of-scope query refused/fallback): 1.0 by definition.
    - False refusal (in-scope query that triggers fallback): 0.0 (user received no answer).
 
---------------------------------------------------------------------------------------------
-
-============================================================================================
 ID  | Topic                  | Route   | C.Rel  | Gnd   | A.Rel  | Top Source / Behavior
---------------------------------------------------------------------------------------------
+
 1   | Return Window          | rag     | 0.4590 | 1.00  | 0.5191 | return_window
 2   | COD Refund             | rag     | 0.5262 | 1.00  | 0.5749 | cod_refund
 3   | Delivery SLAs          | rag     | 0.4788 | 1.00  | 0.5288 | delivery_sla
@@ -81,15 +75,13 @@ ID  | Topic                  | Route   | C.Rel  | Gnd   | A.Rel  | Top Source / 
 13  | Corporate Near-Miss    | refused | 0.4177 | 1.00  | 1.0000 | refused (guardrail)
 14  | Pure Off-Topic         | rag     | 0.0881 | 1.00  | 1.0000 | fallback (ungrounded)
 15  | Ambiguous Return       | rag     | 0.3668 | 1.00  | 0.4380 | return_window
---------------------------------------------------------------------------------------------
+
 SUM (12 In-Scope Only):         | -       | 5.2920 | 12.00 | 5.8177 |
 AVERAGE (12 In-Scope Only):     | -       | 0.4410 | 1.0000| 0.4848 | (#5 retrieved return_window vs warranty)
---------------------------------------------------------------------------------------------
+
 SUM (All 15 Evaluated):         | -       | 6.1646 | 15.00 | 8.2557 |
 AVERAGE (All 15 Evaluated):     | -       | 0.4110 | 1.0000| 0.5504 | (Out-of-scope refusal #13,#14 = 1.0)
-============================================================================================
 
 [Topic Coverage Check]: 12 unique expected docs mapped across 12 in-scope queries.
 Mapped Docs: cod_refund, damaged_item, delivery_sla, escalation_matrix, international_shipping, loyalty_points, order_cancellation, payment_failure, return_window, reverse_pickup, size_exchange, warranty
 12-Topic Complete Coverage: PASS
-
