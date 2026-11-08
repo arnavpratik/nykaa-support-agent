@@ -102,7 +102,7 @@ Outputs match files in `transcripts/` deterministically.
   - **Operational Decision**: Retrieval confidence threshold for `kb_sentence` is calibrated at **`0.30`** (between max unrelated `0.1236` and min in-scope `0.3453`), paired with a deterministic corporate/non-support keyword guardrail to catch corporate near-misses.
 - **Grounded Generation (`generate.py` & `run_grounded.py`)**:
   - Queries below `0.30` similarity or matching corporate keywords return: `"I don't know based on the Nykaa knowledge base."` with empty sources (`grounded=False`).
-  - Demonstrated on 5 in-scope queries plus 1 out-of-scope query ("How do I bake a chocolate cake?", similarity `0.0779`), which triggers the fallback deterministically. The corporate near-miss ("Nykaa share price", `0.4771`, above threshold) is caught by the out-of-scope keyword guardrail and demonstrated in Task 10.
+  - Demonstrated on 5 in-scope queries plus 2 out-of-scope queries: a pure off-topic query ("How do I bake a chocolate cake?", similarity `0.0779`, rejected by threshold) and a corporate near-miss ("What is Nykaa's current share price on the stock exchange?", similarity `0.4771`, rejected by the out-of-scope keyword filter).
 
 ---
 
@@ -208,7 +208,7 @@ Evaluated across 15 distinct test queries: 12 in-scope policy queries (1 per KB 
 2. **Groundedness**: Under extractive `MOCK_LLM`, measures the proportion of answer content sentences present in the retrieved chunks.
    - For answered queries: `1.0` if the extracted sentence appears in retrieved context (near `1.00` by construction under extractive mock).
    - For out-of-scope refusals / fallbacks (Queries #13 & #14): `1.0` by definition since no ungrounded claims were asserted.
-   - Safeguard rule: For an in-scope query (`expected_doc != None`) where the agent refuses/falls back, score `0.0` to penalize false refusals. (Note: No in-scope query refused during testing, so this safeguard did not fire).
+   - Safeguard rule: For an in-scope query (`expected_doc != None`) where the agent refuses/falls back, score `0.0` to penalize false refusals. (Note: No in-scope query refused in the final evaluation run, so this safeguard did not affect the reported averages).
 3. **Answer Relevance**: Cosine similarity between query embedding and answer embedding.
    - For correct refusals on out-of-scope queries (#13 share price and #14 off-topic cake), a correct refusal scores `1.0000` by definition.
    - For an in-scope false refusal, score `0.0000` (user received no answer).
